@@ -29,8 +29,12 @@ app.get('/', async (req, res) => {
 
 app.get('/campgrounds', async (req, res) => {
   const campgrounds = await Campground.find({});
-  console.log(campgrounds[0]);
   res.render('campgrounds/index', { campgrounds });
+});
+
+app.get('/campgrounds/:id', async (req, res) => {
+  const campground = await Campground.findById(req.params.id);
+  res.render('campgrounds/show', { campground });
 });
 
 app.listen(3000, () => {
