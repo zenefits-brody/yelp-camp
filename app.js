@@ -84,6 +84,10 @@ app.delete('/campgrounds/:id', async (req, res) => {
   res.redirect('/campgrounds');
 });
 
+app.use((req, res) => {
+  res.status(404).send('NOT FOUND!');
+});
+
 app.listen(3000, () => {
   console.log('App is listening on port 3000!');
 });
