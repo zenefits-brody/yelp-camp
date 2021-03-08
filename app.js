@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 
 const Campground = require('./models/campground');
+const AppError = require('./AppError');
 
 mongoose
   .connect('mongodb://localhost:27017/yelp-camp', {
