@@ -94,9 +94,8 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.log('******************************');
-  console.log(err);
-  next(err);
+  const { status = 500, message = 'Something went wrong.' } = err;
+  res.status(status).send(message);
 });
 
 app.listen(3000, () => {
