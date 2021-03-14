@@ -38,6 +38,10 @@ app.get('/', async (req, res) => {
   res.render('home');
 });
 
+app.get('/admin', (req, res) => {
+  throw new AppError('You are not an admin.', 403);
+});
+
 app.get('/campgrounds', async (req, res) => {
   const campgrounds = await Campground.find({});
   res.render('campgrounds/index', { campgrounds });
