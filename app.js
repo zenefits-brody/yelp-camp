@@ -57,7 +57,7 @@ app.get('/campgrounds/:id', async (req, res, next) => {
   try {
     const campground = await Campground.findById(req.params.id);
     if (!campground) {
-      return next(notFoundError);
+      throw notFoundError;
     }
     res.render('campgrounds/show', { campground });
   } catch (error) {
