@@ -52,9 +52,17 @@ app.get('/campgrounds/new', async (req, res) => {
   res.render('campgrounds/new');
 });
 
-app.get('/campgrounds/:id', async (req, res) => {
-  const campground = await Campground.findById(req.params.id);
-  res.render('campgrounds/show', { campground });
+app.get('/campgrounds/:id', async (req, res, next) => {
+  const notFoundError = new AppError('Campground not found.', 404);
+  try {
+    const campground = await Campground.findById(req.params.id);
+    if (!campground) {
+      next(notFoundError);
+    }
+    res.render('campgrounds/show', { campground });
+  } catch (error) {
+    next(notFoundError);
+  }
 });
 
 app.get('/campgrounds/:id/edit', async (req, res) => {
