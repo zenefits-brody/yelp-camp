@@ -88,10 +88,17 @@ app.post('/campgrounds', async (req, res, next) => {
  * PUT routes
  */
 
-app.put('/campgrounds/:id', async (req, res) => {
-  const { id } = req.params;
-  await Campground.findByIdAndUpdate(id, req.body.campground);
-  res.redirect(`/campgrounds/${id}`);
+app.put('/campgrounds/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!req.body.campground.title) {
+      throw new AppError('Campground should have a title.', 500);
+    }
+    await Campground.findByIdAndUpdate(id, req.body.campground);
+    res.redirect(`/campgrounds/${id}`);
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
