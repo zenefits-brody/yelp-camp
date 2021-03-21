@@ -74,10 +74,14 @@ app.get('/campgrounds/:id/edit', async (req, res) => {
  * POST routes
  */
 
-app.post('/campgrounds', async (req, res) => {
-  const campground = new Campground(req.body.campground);
-  await campground.save();
-  res.redirect(`/campgrounds/${campground._id}`);
+app.post('/campgrounds', async (req, res, next) => {
+  try {
+    const campground = new Campground(req.body.campground);
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
