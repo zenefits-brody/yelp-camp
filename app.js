@@ -35,6 +35,7 @@ app.use(methodOverride('_method'));
 app.use(morgan('tiny'));
 
 // A wrapper function to handle async errors
+// This won't be needed with express v5
 const wrapAsync = (fn) => async (req, res, next) => {
   try {
     await fn(req, res, next);
@@ -50,14 +51,13 @@ app.get('/admin', (req, res) => {
   throw new AppError('You are not an admin.', 403);
 });
 
-app.get('/campgrounds', async (req, res, next) => {
-  try {
+app.get(
+  '/campgrounds',
+  wrapAsync(async (req, res, next) => {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', { campgrounds });
-  } catch (error) {
-    next(error);
-  }
-});
+  }),
+);
 
 // This route needs to be defined before `/campgrounds/:id` route, otherwise we can never enter this route.
 app.get('/campgrounds/new', (req, res) => {
@@ -75,59 +75,55 @@ app.get(
   }),
 );
 
-app.get('/campgrounds/:id/edit', async (req, res, next) => {
-  try {
+app.get(
+  '/campgrounds/:id/edit',
+  wrapAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campground });
-  } catch (error) {
-    next(error);
-  }
-});
+  }),
+);
 
 /**
  * POST routes
  */
 
-app.post('/campgrounds', async (req, res, next) => {
-  try {
+app.post(
+  '/campgrounds',
+  wrapAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
-  } catch (error) {
-    next(error);
-  }
-});
+  }),
+);
 
 /**
  * PUT routes
  */
 
-app.put('/campgrounds/:id', async (req, res, next) => {
-  try {
+app.put(
+  '/campgrounds/:id',
+  wrapAsync(async (req, res, next) => {
     const { id } = req.params;
     if (!req.body.campground.title) {
       throw new AppError('Campground should have a title.', 500);
     }
     await Campground.findByIdAndUpdate(id, req.body.campground);
     res.redirect(`/campgrounds/${id}`);
-  } catch (error) {
-    next(error);
-  }
-});
+  }),
+);
 
 /**
  * DELETE routes
  */
 
-app.delete('/campgrounds/:id', async (req, res, next) => {
-  try {
+app.delete(
+  '/campgrounds/:id',
+  wrapAsync(async (req, res, next) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
-  } catch (error) {
-    next(error);
-  }
-});
+  }),
+);
 
 app.use((req, res) => {
   res.status(404).send('NOT FOUND!');
