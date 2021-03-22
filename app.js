@@ -34,6 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny'));
 
+// A wrapper function to handle async errors
+const wrapAsync = (fn) => async (req, res, next) => {
+  try {
+    await fn(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+};
 app.get('/', (req, res) => {
   res.render('home');
 });
@@ -56,18 +64,16 @@ app.get('/campgrounds/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
-app.get('/campgrounds/:id', async (req, res, next) => {
-  const notFoundError = new AppError('Campground not found.', 404);
-  try {
+app.get(
+  '/campgrounds/:id',
+  wrapAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     if (!campground) {
-      throw notFoundError;
+      throw new AppError('Campground not found.', 404);
     }
     res.render('campgrounds/show', { campground });
-  } catch (error) {
-    next(notFoundError);
-  }
-});
+  }),
+);
 
 app.get('/campgrounds/:id/edit', async (req, res, next) => {
   try {
