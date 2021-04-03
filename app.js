@@ -125,8 +125,8 @@ app.delete(
   }),
 );
 
-app.use((req, res) => {
-  res.status(404).send('NOT FOUND!');
+app.use((req, res, next) => {
+  next(new AppError('Page Not Found.', 404));
 });
 
 // Error handling middleware
