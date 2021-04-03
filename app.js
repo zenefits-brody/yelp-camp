@@ -131,8 +131,9 @@ app.use((req, res, next) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  const { status = 500, message = 'Something went wrong.' } = err;
-  res.status(status).send(message);
+  const { status = 500 } = err;
+  err.message = err.message || 'Something went wrong.';
+  res.status(status).render('error', { err });
 });
 
 app.listen(3000, () => {
