@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
+const Joi = require('joi');
 
 const Campground = require('./models/campground');
 const AppError = require('./AppError');
@@ -90,6 +91,22 @@ app.get(
 app.post(
   '/campgrounds',
   wrapAsync(async (req, res, next) => {
+    const campgroundValidateSchema = Joi.object({
+      campground: Joi.object({
+        title: Joi.string().required(),
+        price: Joi.number().required().min(0),
+        image: Joi.string().required(),
+        location: Joi.string().required(),
+        description: Joi.string().required(),
+      }).required(),
+    });
+
+    const { error } = campgroundValidateSchema.validate(req.body);
+    if (error) {
+      const message = error.details.map((el) => el.message).join(', ');
+      throw new AppError(message, 400);
+    }
+
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
