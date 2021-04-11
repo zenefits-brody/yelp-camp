@@ -44,6 +44,27 @@ const wrapAsync = (fn) => async (req, res, next) => {
     next(error);
   }
 };
+
+const validateCampground = (req, res, next) => {
+  const campgroundValidateSchema = Joi.object({
+    campground: Joi.object({
+      title: Joi.string().required(),
+      price: Joi.number().required().min(0),
+      image: Joi.string().required(),
+      location: Joi.string().required(),
+      description: Joi.string().required(),
+    }).required(),
+  });
+
+  const { error } = campgroundValidateSchema.validate(req.body);
+  if (error) {
+    const message = error.details.map((el) => el.message).join(', ');
+    throw new AppError(message, 400);
+  } else {
+    next();
+  }
+};
+
 app.get('/', (req, res) => {
   res.render('home');
 });
@@ -90,23 +111,8 @@ app.get(
 
 app.post(
   '/campgrounds',
+  validateCampground,
   wrapAsync(async (req, res, next) => {
-    const campgroundValidateSchema = Joi.object({
-      campground: Joi.object({
-        title: Joi.string().required(),
-        price: Joi.number().required().min(0),
-        image: Joi.string().required(),
-        location: Joi.string().required(),
-        description: Joi.string().required(),
-      }).required(),
-    });
-
-    const { error } = campgroundValidateSchema.validate(req.body);
-    if (error) {
-      const message = error.details.map((el) => el.message).join(', ');
-      throw new AppError(message, 400);
-    }
-
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -119,6 +125,7 @@ app.post(
 
 app.put(
   '/campgrounds/:id',
+  validateCampground,
   wrapAsync(async (req, res, next) => {
     const { id } = req.params;
     if (!req.body.campground.title) {
