@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
-const Joi = require('joi');
 
 const Campground = require('./models/campground');
 const AppError = require('./AppError');
+const { campgroundValidateSchema } = require('./joiSchemas');
 
 mongoose
   .connect('mongodb://localhost:27017/yelp-camp', {
@@ -46,16 +46,6 @@ const wrapAsync = (fn) => async (req, res, next) => {
 };
 
 const validateCampground = (req, res, next) => {
-  const campgroundValidateSchema = Joi.object({
-    campground: Joi.object({
-      title: Joi.string().required(),
-      price: Joi.number().required().min(0),
-      image: Joi.string().required(),
-      location: Joi.string().required(),
-      description: Joi.string().required(),
-    }).required(),
-  });
-
   const { error } = campgroundValidateSchema.validate(req.body);
   if (error) {
     const message = error.details.map((el) => el.message).join(', ');
