@@ -143,7 +143,7 @@ app.use((req, res, next) => {
   next(new AppError('Page Not Found.', 404));
 });
 
-// Error handling middleware
+// Error handling middleware.
 app.use((err, req, res, next) => {
   const { status = 500 } = err;
   err.message = err.message || 'Something went wrong.';
