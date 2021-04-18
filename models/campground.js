@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const CampgroundSchema = new Schema({
   title: { type: String, required: [true, 'Title cannot be empty.'] },
@@ -8,6 +8,11 @@ const CampgroundSchema = new Schema({
   price: Number,
   description: String,
   location: String,
+  reviews: [
+    {
+      type: Schema.Types.ObjectId,
+    },
+  ],
 });
 
 module.exports = mongoose.model('Campground', CampgroundSchema);
