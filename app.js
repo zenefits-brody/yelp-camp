@@ -109,6 +109,13 @@ app.post(
   }),
 );
 
+app.post(
+  '/campgrounds/:id/reviews',
+  wrapAsync(async (req, res) => {
+    res.send('You made it.');
+  }),
+);
+
 /**
  * PUT routes
  */
