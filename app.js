@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 
 const Campground = require('./models/campground');
+const Review = require('./models/review');
 const AppError = require('./AppError');
 const { campgroundValidateSchema } = require('./joiSchemas');
 
@@ -112,7 +113,12 @@ app.post(
 app.post(
   '/campgrounds/:id/reviews',
   wrapAsync(async (req, res) => {
-    res.send('You made it.');
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
   }),
 );
 
