@@ -8,7 +8,7 @@ const ejsMate = require('ejs-mate');
 const Campground = require('./models/campground');
 const Review = require('./models/review');
 const AppError = require('./AppError');
-const { campgroundValidateSchema } = require('./joiSchemas');
+const { campgroundValidateSchema, reviewValidateSchema } = require('./joiSchemas');
 
 mongoose
   .connect('mongodb://localhost:27017/yelp-camp', {
@@ -48,6 +48,16 @@ const wrapAsync = (fn) => async (req, res, next) => {
 
 const validateCampground = (req, res, next) => {
   const { error } = campgroundValidateSchema.validate(req.body);
+  if (error) {
+    const message = error.details.map((el) => el.message).join(', ');
+    throw new AppError(message, 400);
+  } else {
+    next();
+  }
+};
+
+const validateReview = (req, res, next) => {
+  const { error } = reviewValidateSchema.validate(req.body);
   if (error) {
     const message = error.details.map((el) => el.message).join(', ');
     throw new AppError(message, 400);
@@ -112,6 +122,7 @@ app.post(
 
 app.post(
   '/campgrounds/:id/reviews',
+  validateReview,
   wrapAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review);
