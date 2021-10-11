@@ -163,6 +163,17 @@ app.delete(
   }),
 );
 
+app.delete(
+  '/campgrounds/:campgroundId/reviews/:reviewId',
+  wrapAsync(async (req, res) => {
+    const { campgroundId, reviewId } = req.params;
+    // $pull: https://docs.mongodb.com/manual/reference/operator/update/pull/
+    await Campground.findByIdAndUpdate(campgroundId, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/campgrounds/${campgroundId}`);
+  }),
+);
+
 app.use((req, res, next) => {
   next(new AppError('Page Not Found.', 404));
 });
