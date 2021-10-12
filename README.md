@@ -1,1 +1,1 @@
-To start the app: `node app.js`.
+To start the app: `nodemon app.js`.
