@@ -1,21 +1,13 @@
 const express = require('express');
 
+const reviewRoutes = require('./reviews');
+const { wrapAsync } = require('./utils');
 const Campground = require('../models/campground');
 const Review = require('../models/review');
 const AppError = require('../AppError');
-const { campgroundValidateSchema, reviewValidateSchema } = require('../joiSchemas');
+const { campgroundValidateSchema } = require('../joiSchemas');
 
 const router = express.Router();
-
-// A wrapper function to handle async errors
-// This won't be needed with express v5
-const wrapAsync = (fn) => async (req, res, next) => {
-  try {
-    await fn(req, res, next);
-  } catch (error) {
-    next(error);
-  }
-};
 
 const validateCampground = (req, res, next) => {
   const { error } = campgroundValidateSchema.validate(req.body);
@@ -27,15 +19,7 @@ const validateCampground = (req, res, next) => {
   }
 };
 
-const validateReview = (req, res, next) => {
-  const { error } = reviewValidateSchema.validate(req.body);
-  if (error) {
-    const message = error.details.map((el) => el.message).join(', ');
-    throw new AppError(message, 400);
-  } else {
-    next();
-  }
-};
+router.use('/:id/reviews', reviewRoutes);
 
 router.get(
   '/',
@@ -83,19 +67,6 @@ router.post(
   }),
 );
 
-router.post(
-  '/:id/reviews',
-  validateReview,
-  wrapAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-  }),
-);
-
 /**
  * PUT routes
  */
@@ -123,17 +94,6 @@ router.delete(
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
-  }),
-);
-
-router.delete(
-  '/:campgroundId/reviews/:reviewId',
-  wrapAsync(async (req, res) => {
-    const { campgroundId, reviewId } = req.params;
-    // $pull: https://docs.mongodb.com/manual/reference/operator/update/pull/
-    await Campground.findByIdAndUpdate(campgroundId, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${campgroundId}`);
   }),
 );
 
