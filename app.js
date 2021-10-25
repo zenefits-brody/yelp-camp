@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
+const session = require('express-session');
 
 const campgroudRoutes = require('./routes/campgrounds');
 const AppError = require('./AppError');
@@ -35,6 +36,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  session({
+    secret: 'this should be a better secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  }),
+);
 
 app.get('/', (req, res) => {
   res.render('home');
