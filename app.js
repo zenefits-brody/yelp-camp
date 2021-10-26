@@ -5,6 +5,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const session = require('express-session');
+const flash = require('connect-flash');
 
 const campgroudRoutes = require('./routes/campgrounds');
 const AppError = require('./AppError');
@@ -47,6 +48,14 @@ app.use(
     },
   }),
 );
+app.use(flash());
+
+app.use((req, res, next) => {
+  // By doing this, we will have access to `success` in our templates.
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
+});
 
 app.get('/', (req, res) => {
   res.render('home');

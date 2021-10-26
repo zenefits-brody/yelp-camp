@@ -60,9 +60,10 @@ router.get(
 router.post(
   '/',
   validateCampground,
-  wrapAsync(async (req, res, next) => {
+  wrapAsync(async (req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
+    req.flash('success', 'New campground created successfully.');
     res.redirect(`/campgrounds/${campground._id}`);
   }),
 );
