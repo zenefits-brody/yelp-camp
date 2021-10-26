@@ -81,6 +81,8 @@ router.put(
       throw new AppError('Campground should have a title.', 500);
     }
     await Campground.findByIdAndUpdate(id, req.body.campground);
+
+    req.flash('success', 'Successfully updated campground.');
     res.redirect(`/campgrounds/${id}`);
   }),
 );
@@ -94,6 +96,8 @@ router.delete(
   wrapAsync(async (req, res, next) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
+
+    req.flash('success', 'Successfully deleted the campground.');
     res.redirect('/campgrounds');
   }),
 );
