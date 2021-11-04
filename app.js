@@ -1,14 +1,20 @@
-const express = require('express');
-const path = require('path');
-const mongoose = require('mongoose');
-const methodOverride = require('method-override');
-const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
-const session = require('express-session');
+const express = require('express');
 const flash = require('connect-flash');
+const methodOverride = require('method-override');
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+const passport = require('passport');
+const passportLocal = require('passport-local');
+const path = require('path');
+const session = require('express-session');
 
 const campgroudRoutes = require('./routes/campgrounds');
+const userRoutes = require('./routes/users');
 const AppError = require('./AppError');
+const User = require('./models/user');
+
+const LocalStrategy = passportLocal.Strategy;
 
 mongoose
   .connect('mongodb://localhost:27017/yelp-camp', {
@@ -49,6 +55,14 @@ app.use(
   }),
 );
 app.use(flash());
+app.use(passport.initialize());
+// This needs to be after app.use(session(...))
+// https://www.npmjs.com/package/passport
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
   // By doing this, we will have access to `success` in our templates.
@@ -56,6 +70,8 @@ app.use((req, res, next) => {
   res.locals.error = req.flash('error');
   next();
 });
+
+app.use('/', userRoutes);
 
 app.get('/', (req, res) => {
   res.render('home');
