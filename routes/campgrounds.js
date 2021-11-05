@@ -2,6 +2,7 @@ const express = require('express');
 
 const reviewRoutes = require('./reviews');
 const { wrapAsync } = require('./utils');
+const { isLoggedIn } = require('../middleware/middleware');
 const Campground = require('../models/campground');
 const Review = require('../models/review');
 const AppError = require('../AppError');
@@ -30,7 +31,7 @@ router.get(
 );
 
 // This route needs to be defined before `/:id` route, otherwise we can never enter this route.
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
   res.render('campgrounds/new');
 });
 
@@ -48,6 +49,7 @@ router.get(
 
 router.get(
   '/:id/edit',
+  isLoggedIn,
   wrapAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id);
 
@@ -66,6 +68,7 @@ router.get(
 
 router.post(
   '/',
+  isLoggedIn,
   validateCampground,
   wrapAsync(async (req, res) => {
     const campground = new Campground(req.body.campground);
@@ -81,6 +84,7 @@ router.post(
 
 router.put(
   '/:id',
+  isLoggedIn,
   validateCampground,
   wrapAsync(async (req, res, next) => {
     const { id } = req.params;
@@ -100,6 +104,7 @@ router.put(
 
 router.delete(
   '/:id',
+  isLoggedIn,
   wrapAsync(async (req, res, next) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
