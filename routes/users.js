@@ -10,6 +10,12 @@ router.get('/login', (req, res) => {
   res.render('users/login');
 });
 
+router.get('/logout', (req, res) => {
+  req.logout();
+  req.flash('success', 'Hasta luego!');
+  res.redirect('/login');
+});
+
 router.get('/register', (req, res) => {
   res.render('users/register');
 });
