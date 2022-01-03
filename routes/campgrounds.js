@@ -89,9 +89,16 @@ router.put(
   validateCampground,
   wrapAsync(async (req, res, next) => {
     const { id } = req.params;
+    const campground = await Campground.findById(id);
+    if (!campground.author.equals(req.user._id)) {
+      req.flash('error', 'You do not have permission.');
+      return res.redirect(`/campgrounds/${id}`);
+    }
+
     if (!req.body.campground.title) {
       throw new AppError('Campground should have a title.', 500);
     }
+
     await Campground.findByIdAndUpdate(id, req.body.campground);
 
     req.flash('success', 'Successfully updated campground.');
