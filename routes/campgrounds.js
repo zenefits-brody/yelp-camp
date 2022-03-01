@@ -58,6 +58,11 @@ router.get(
       return res.redirect('/campgrounds');
     }
 
+    if (!campground.author.equals(req.user._id)) {
+      req.flash('error', 'You do not have permission.');
+      return res.redirect(`/campgrounds/${req.params.id}`);
+    }
+
     res.render('campgrounds/edit', { campground });
   }),
 );
